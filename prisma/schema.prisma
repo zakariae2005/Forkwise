@@ -24,10 +24,12 @@ model User {
   accounts      Account[]
   sessions      Session[]
 
-  restaurantId  String?
-  restaurant    Restaurant? @relation(fields: [restaurantId], references: [id])
+  Restaurant Restaurant[] @relation("UserRestaurant")
+
 
   createdAt     DateTime @default(now())
+
+  
 }
 
 model Restaurant {
@@ -46,7 +48,8 @@ model Restaurant {
 
   createdAt       DateTime @default(now())
 
-  users           User[]
+   userId          String   @unique
+  user            User     @relation("UserRestaurant", fields: [userId], references: [id])
   menuItems       MenuItem[]
   incomes         Income[]
   expenses        Expense[]
