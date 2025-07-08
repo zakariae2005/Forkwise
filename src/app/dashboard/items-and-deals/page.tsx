@@ -153,7 +153,7 @@ const handleEditPromotion = (promotion: Promotion) => {
 
           <Card className="bg-white/80 backdrop-blur-sm border-slate-200 hover:shadow-xl hover:shadow-emerald-100/50 transition-all duration-300">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-slate-700">Active Promotions</CardTitle>
+              <CardTitle className="text-sm font-medium text-slate-700">Active Promotions </CardTitle>
               <div className="p-2 bg-emerald-100 rounded-lg">
                 <Megaphone className="h-4 w-4 text-emerald-600" />
               </div>
