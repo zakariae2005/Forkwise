@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import * as React from "react"
@@ -104,6 +105,19 @@ ${colorConfig
 
 const ChartTooltip = RechartsPrimitive.Tooltip
 
+// Add proper typing for the tooltip props
+type TooltipProps = React.ComponentProps<typeof RechartsPrimitive.Tooltip> & {
+  active?: boolean
+  label?: string | number | React.ReactNode
+  payload?: Array<{
+    dataKey?: string
+    name?: string
+    value?: any
+    color?: string
+    payload?: any
+  }>
+}
+
 function ChartTooltipContent({
   active,
   payload,
@@ -118,7 +132,7 @@ function ChartTooltipContent({
   color,
   nameKey,
   labelKey,
-}: React.ComponentProps<typeof RechartsPrimitive.Tooltip> &
+}: TooltipProps &
   React.ComponentProps<"div"> & {
     hideLabel?: boolean
     hideIndicator?: boolean
@@ -182,7 +196,7 @@ function ChartTooltipContent({
         {payload.map((item, index) => {
           const key = `${nameKey || item.name || item.dataKey || "value"}`
           const itemConfig = getPayloadConfigFromPayload(config, item, key)
-          const indicatorColor = color || item.payload.fill || item.color
+          const indicatorColor = color || item.payload?.fill || item.color
 
           return (
             <div
@@ -250,6 +264,16 @@ function ChartTooltipContent({
 
 const ChartLegend = RechartsPrimitive.Legend
 
+// Add proper typing for legend props
+type LegendProps = {
+  payload?: Array<{
+    value?: string
+    dataKey?: string
+    color?: string
+  }>
+  verticalAlign?: "top" | "bottom"
+}
+
 function ChartLegendContent({
   className,
   hideIcon = false,
@@ -257,7 +281,7 @@ function ChartLegendContent({
   verticalAlign = "bottom",
   nameKey,
 }: React.ComponentProps<"div"> &
-  Pick<RechartsPrimitive.LegendProps, "payload" | "verticalAlign"> & {
+  LegendProps & {
     hideIcon?: boolean
     nameKey?: string
   }) {
