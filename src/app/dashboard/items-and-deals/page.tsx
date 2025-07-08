@@ -84,21 +84,39 @@ const promotions = [
   },
 ]
 
+type MenuItem = {
+  id: number
+  name: string
+  price: number
+  category: string
+  description: string
+  image: string
+}
+
+type Promotion = {
+  id: number
+  message: string
+  active: boolean
+  createdAt: string
+  startDate: string
+  endDate: string
+}
+
 export default function RestaurantDashboard() {
   const [isMenuDialogOpen, setIsMenuDialogOpen] = useState(false)
   const [isPromotionDialogOpen, setIsPromotionDialogOpen] = useState(false)
-  const [editingMenuItem, setEditingMenuItem] = useState(null)
-  const [editingPromotion, setEditingPromotion] = useState(null)
+  const [editingMenuItem, setEditingMenuItem] = useState<MenuItem | null>(null)
+const [editingPromotion, setEditingPromotion] = useState<Promotion | null>(null)
 
-  const handleEditMenuItem = (item) => {
-    setEditingMenuItem(item)
-    setIsMenuDialogOpen(true)
-  }
+  const handleEditMenuItem = (item: MenuItem) => {
+  setEditingMenuItem(item)
+  setIsMenuDialogOpen(true)
+}
 
-  const handleEditPromotion = (promotion) => {
-    setEditingPromotion(promotion)
-    setIsPromotionDialogOpen(true)
-  }
+const handleEditPromotion = (promotion: Promotion) => {
+  setEditingPromotion(promotion)
+  setIsPromotionDialogOpen(true)
+}
 
   const resetMenuDialog = () => {
     setEditingMenuItem(null)
@@ -111,55 +129,63 @@ export default function RestaurantDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
       <div className="container mx-auto p-6 space-y-8">
         {/* Header */}
         <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold text-amber-900">Restaurant Dashboard</h1>
-          <p className="text-amber-700 text-lg">Manage your menu and promotions with ease</p>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Restaurant Dashboard</h1>
+          <p className="text-slate-600 text-lg">Manage your menu and promotions with ease</p>
         </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card className="bg-white/70 backdrop-blur-sm border-amber-200 hover:shadow-lg transition-all duration-300">
+          <Card className="bg-white/80 backdrop-blur-sm border-slate-200 hover:shadow-xl hover:shadow-blue-100/50 transition-all duration-300">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-amber-800">Total Menu Items</CardTitle>
-              <Utensils className="h-4 w-4 text-amber-600" />
+              <CardTitle className="text-sm font-medium text-slate-700">Total Menu Items</CardTitle>
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <Utensils className="h-4 w-4 text-blue-600" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-amber-900">{menuItems.length}</div>
+              <div className="text-2xl font-bold text-slate-900">{menuItems.length}</div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white/70 backdrop-blur-sm border-amber-200 hover:shadow-lg transition-all duration-300">
+          <Card className="bg-white/80 backdrop-blur-sm border-slate-200 hover:shadow-xl hover:shadow-emerald-100/50 transition-all duration-300">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-amber-800">Active Promotions</CardTitle>
-              <Megaphone className="h-4 w-4 text-amber-600" />
+              <CardTitle className="text-sm font-medium text-slate-700">Active Promotions</CardTitle>
+              <div className="p-2 bg-emerald-100 rounded-lg">
+                <Megaphone className="h-4 w-4 text-emerald-600" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-amber-900">{promotions.filter((p) => p.active).length}</div>
+              <div className="text-2xl font-bold text-slate-900">{promotions.filter((p) => p.active).length}</div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white/70 backdrop-blur-sm border-amber-200 hover:shadow-lg transition-all duration-300">
+          <Card className="bg-white/80 backdrop-blur-sm border-slate-200 hover:shadow-xl hover:shadow-purple-100/50 transition-all duration-300">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-amber-800">Avg. Price</CardTitle>
-              <DollarSign className="h-4 w-4 text-amber-600" />
+              <CardTitle className="text-sm font-medium text-slate-700">Avg. Price</CardTitle>
+              <div className="p-2 bg-purple-100 rounded-lg">
+                <DollarSign className="h-4 w-4 text-purple-600" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-amber-900">
+              <div className="text-2xl font-bold text-slate-900">
                 ${(menuItems.reduce((sum, item) => sum + item.price, 0) / menuItems.length).toFixed(2)}
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white/70 backdrop-blur-sm border-amber-200 hover:shadow-lg transition-all duration-300">
+          <Card className="bg-white/80 backdrop-blur-sm border-slate-200 hover:shadow-xl hover:shadow-orange-100/50 transition-all duration-300">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-amber-800">Categories</CardTitle>
-              <Calendar className="h-4 w-4 text-amber-600" />
+              <CardTitle className="text-sm font-medium text-slate-700">Categories</CardTitle>
+              <div className="p-2 bg-orange-100 rounded-lg">
+                <Calendar className="h-4 w-4 text-orange-600" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-amber-900">
+              <div className="text-2xl font-bold text-slate-900">
                 {new Set(menuItems.map((item) => item.category)).size}
               </div>
             </CardContent>
@@ -168,16 +194,16 @@ export default function RestaurantDashboard() {
 
         {/* Main Tabs */}
         <Tabs defaultValue="menu" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 bg-white/70 backdrop-blur-sm border border-amber-200">
+          <TabsList className="grid w-full grid-cols-2 bg-white/80 backdrop-blur-sm border border-slate-200 shadow-sm">
             <TabsTrigger
               value="menu"
-              className="data-[state=active]:bg-amber-100 data-[state=active]:text-amber-900 text-amber-700 font-medium"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-indigo-500 data-[state=active]:text-white text-slate-600 font-medium transition-all duration-300"
             >
               Menu Items
             </TabsTrigger>
             <TabsTrigger
               value="promotions"
-              className="data-[state=active]:bg-amber-100 data-[state=active]:text-amber-900 text-amber-700 font-medium"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-indigo-500 data-[state=active]:text-white text-slate-600 font-medium transition-all duration-300"
             >
               Promotions
             </TabsTrigger>
@@ -186,11 +212,11 @@ export default function RestaurantDashboard() {
           {/* Menu Items Tab */}
           <TabsContent value="menu" className="space-y-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-semibold text-amber-900">Menu Items</h2>
+              <h2 className="text-2xl font-semibold text-slate-800">Menu Items</h2>
               <Dialog open={isMenuDialogOpen} onOpenChange={setIsMenuDialogOpen}>
                 <DialogTrigger asChild>
                   <Button
-                    className="bg-amber-600 hover:bg-amber-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
                     onClick={() => setEditingMenuItem(null)}
                   >
                     <Plus className="w-4 h-4 mr-2" />
@@ -199,10 +225,10 @@ export default function RestaurantDashboard() {
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[600px] bg-white">
                   <DialogHeader>
-                    <DialogTitle className="text-amber-900">
+                    <DialogTitle className="text-slate-800">
                       {editingMenuItem ? "Edit Menu Item" : "Add New Menu Item"}
                     </DialogTitle>
-                    <DialogDescription className="text-amber-700">
+                    <DialogDescription className="text-slate-600">
                       {editingMenuItem
                         ? "Update the menu item details below."
                         : "Fill in the details for your new menu item."}
@@ -210,17 +236,17 @@ export default function RestaurantDashboard() {
                   </DialogHeader>
                   <div className="grid gap-4 py-4">
                     <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="name" className="text-right text-amber-800">
+                      <Label htmlFor="name" className="text-right text-slate-700">
                         Name
                       </Label>
                       <Input
                         id="name"
                         defaultValue={editingMenuItem?.name || ""}
-                        className="col-span-3 border-amber-200 focus:border-amber-400"
+                        className="col-span-3 border-slate-200 focus:border-blue-400 focus:ring-blue-400"
                       />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="price" className="text-right text-amber-800">
+                      <Label htmlFor="price" className="text-right text-slate-700">
                         Price
                       </Label>
                       <Input
@@ -228,15 +254,15 @@ export default function RestaurantDashboard() {
                         type="number"
                         step="0.01"
                         defaultValue={editingMenuItem?.price || ""}
-                        className="col-span-3 border-amber-200 focus:border-amber-400"
+                        className="col-span-3 border-slate-200 focus:border-blue-400 focus:ring-blue-400"
                       />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="category" className="text-right text-amber-800">
+                      <Label htmlFor="category" className="text-right text-slate-700">
                         Category
                       </Label>
                       <Select defaultValue={editingMenuItem?.category || ""}>
-                        <SelectTrigger className="col-span-3 border-amber-200">
+                        <SelectTrigger className="col-span-3 border-slate-200 focus:border-blue-400">
                           <SelectValue placeholder="Select category" />
                         </SelectTrigger>
                         <SelectContent>
@@ -250,23 +276,23 @@ export default function RestaurantDashboard() {
                       </Select>
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="description" className="text-right text-amber-800">
+                      <Label htmlFor="description" className="text-right text-slate-700">
                         Description
                       </Label>
                       <Textarea
                         id="description"
                         defaultValue={editingMenuItem?.description || ""}
-                        className="col-span-3 border-amber-200 focus:border-amber-400"
+                        className="col-span-3 border-slate-200 focus:border-blue-400 focus:ring-blue-400"
                       />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="image" className="text-right text-amber-800">
+                      <Label htmlFor="image" className="text-right text-slate-700">
                         Image URL
                       </Label>
                       <Input
                         id="image"
                         defaultValue={editingMenuItem?.image || ""}
-                        className="col-span-3 border-amber-200 focus:border-amber-400"
+                        className="col-span-3 border-slate-200 focus:border-blue-400 focus:ring-blue-400"
                       />
                     </div>
                   </div>
@@ -274,11 +300,11 @@ export default function RestaurantDashboard() {
                     <Button
                       variant="outline"
                       onClick={resetMenuDialog}
-                      className="border-amber-200 text-amber-700 bg-transparent"
+                      className="border-slate-200 text-slate-600 hover:bg-slate-50"
                     >
                       Cancel
                     </Button>
-                    <Button onClick={resetMenuDialog} className="bg-amber-600 hover:bg-amber-700 text-white">
+                    <Button onClick={resetMenuDialog} className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white">
                       {editingMenuItem ? "Update Item" : "Add Item"}
                     </Button>
                   </DialogFooter>
@@ -290,7 +316,7 @@ export default function RestaurantDashboard() {
               {menuItems.map((item) => (
                 <Card
                   key={item.id}
-                  className="bg-white/80 backdrop-blur-sm border-amber-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                  className="bg-white/90 backdrop-blur-sm border-slate-200 hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300 hover:-translate-y-1"
                 >
                   <div className="aspect-video relative overflow-hidden rounded-t-lg">
                     <img
@@ -298,24 +324,25 @@ export default function RestaurantDashboard() {
                       alt={item.name}
                       className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
                     />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300" />
                   </div>
                   <CardHeader className="pb-3">
                     <div className="flex justify-between items-start">
-                      <CardTitle className="text-amber-900 text-lg">{item.name}</CardTitle>
-                      <Badge variant="secondary" className="bg-amber-100 text-amber-800 border-amber-200">
+                      <CardTitle className="text-slate-800 text-lg">{item.name}</CardTitle>
+                      <Badge variant="secondary" className="bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 border-blue-200">
                         {item.category}
                       </Badge>
                     </div>
-                    <div className="text-2xl font-bold text-amber-600">${item.price}</div>
+                    <div className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">${item.price}</div>
                   </CardHeader>
                   <CardContent className="pt-0">
-                    <p className="text-amber-700 text-sm mb-4 line-clamp-2">{item.description}</p>
+                    <p className="text-slate-600 text-sm mb-4 line-clamp-2">{item.description}</p>
                     <div className="flex gap-2">
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => handleEditMenuItem(item)}
-                        className="flex-1 border-amber-200 text-amber-700 hover:bg-amber-50"
+                        className="flex-1 border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-800"
                       >
                         <Edit className="w-4 h-4 mr-1" />
                         Edit
@@ -338,11 +365,11 @@ export default function RestaurantDashboard() {
           {/* Promotions Tab */}
           <TabsContent value="promotions" className="space-y-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-semibold text-amber-900">Promotions</h2>
+              <h2 className="text-2xl font-semibold text-slate-800">Promotions</h2>
               <Dialog open={isPromotionDialogOpen} onOpenChange={setIsPromotionDialogOpen}>
                 <DialogTrigger asChild>
                   <Button
-                    className="bg-amber-600 hover:bg-amber-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
                     onClick={() => setEditingPromotion(null)}
                   >
                     <Plus className="w-4 h-4 mr-2" />
@@ -351,10 +378,10 @@ export default function RestaurantDashboard() {
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[600px] bg-white">
                   <DialogHeader>
-                    <DialogTitle className="text-amber-900">
+                    <DialogTitle className="text-slate-800">
                       {editingPromotion ? "Edit Promotion" : "Add New Promotion"}
                     </DialogTitle>
-                    <DialogDescription className="text-amber-700">
+                    <DialogDescription className="text-slate-600">
                       {editingPromotion
                         ? "Update the promotion details below."
                         : "Create a new promotion for your restaurant."}
@@ -362,17 +389,17 @@ export default function RestaurantDashboard() {
                   </DialogHeader>
                   <div className="grid gap-4 py-4">
                     <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="message" className="text-right text-amber-800">
+                      <Label htmlFor="message" className="text-right text-slate-700">
                         Message
                       </Label>
                       <Textarea
                         id="message"
                         defaultValue={editingPromotion?.message || ""}
-                        className="col-span-3 border-amber-200 focus:border-amber-400"
+                        className="col-span-3 border-slate-200 focus:border-blue-400 focus:ring-blue-400"
                       />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="active" className="text-right text-amber-800">
+                      <Label htmlFor="active" className="text-right text-slate-700">
                         Active
                       </Label>
                       <div className="col-span-3">
@@ -380,25 +407,25 @@ export default function RestaurantDashboard() {
                       </div>
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="startDate" className="text-right text-amber-800">
+                      <Label htmlFor="startDate" className="text-right text-slate-700">
                         Start Date
                       </Label>
                       <Input
                         id="startDate"
                         type="date"
                         defaultValue={editingPromotion?.startDate || ""}
-                        className="col-span-3 border-amber-200 focus:border-amber-400"
+                        className="col-span-3 border-slate-200 focus:border-blue-400 focus:ring-blue-400"
                       />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="endDate" className="text-right text-amber-800">
+                      <Label htmlFor="endDate" className="text-right text-slate-700">
                         End Date
                       </Label>
                       <Input
                         id="endDate"
                         type="date"
                         defaultValue={editingPromotion?.endDate || ""}
-                        className="col-span-3 border-amber-200 focus:border-amber-400"
+                        className="col-span-3 border-slate-200 focus:border-blue-400 focus:ring-blue-400"
                       />
                     </div>
                   </div>
@@ -406,11 +433,11 @@ export default function RestaurantDashboard() {
                     <Button
                       variant="outline"
                       onClick={resetPromotionDialog}
-                      className="border-amber-200 text-amber-700 bg-transparent"
+                      className="border-slate-200 text-slate-600 hover:bg-slate-50"
                     >
                       Cancel
                     </Button>
-                    <Button onClick={resetPromotionDialog} className="bg-amber-600 hover:bg-amber-700 text-white">
+                    <Button onClick={resetPromotionDialog} className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white">
                       {editingPromotion ? "Update Promotion" : "Add Promotion"}
                     </Button>
                   </DialogFooter>
@@ -422,11 +449,11 @@ export default function RestaurantDashboard() {
               {promotions.map((promotion) => (
                 <Card
                   key={promotion.id}
-                  className="bg-white/80 backdrop-blur-sm border-amber-200 hover:shadow-xl transition-all duration-300"
+                  className="bg-white/80 backdrop-blur-sm border-slate-200 hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300"
                 >
                   <CardHeader>
                     <div className="flex justify-between items-start">
-                      <CardTitle className="text-amber-900 text-lg flex-1 pr-4">{promotion.message}</CardTitle>
+                      <CardTitle className="text-slate-800 text-lg flex-1 pr-4">{promotion.message}</CardTitle>
                       <div className="flex items-center gap-2">
                         {promotion.active ? (
                           <ToggleRight className="w-6 h-6 text-green-600" />
@@ -449,12 +476,12 @@ export default function RestaurantDashboard() {
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
-                        <span className="text-amber-700 font-medium">Created:</span>
-                        <p className="text-amber-600">{new Date(promotion.createdAt).toLocaleDateString()}</p>
+                        <span className="text-slate-700 font-medium">Created:</span>
+                        <p className="text-slate-600">{new Date(promotion.createdAt).toLocaleDateString()}</p>
                       </div>
                       <div>
-                        <span className="text-amber-700 font-medium">Duration:</span>
-                        <p className="text-amber-600">
+                        <span className="text-slate-700 font-medium">Duration:</span>
+                        <p className="text-slate-600">
                           {new Date(promotion.startDate).toLocaleDateString()} -{" "}
                           {new Date(promotion.endDate).toLocaleDateString()}
                         </p>
@@ -465,7 +492,7 @@ export default function RestaurantDashboard() {
                         size="sm"
                         variant="outline"
                         onClick={() => handleEditPromotion(promotion)}
-                        className="flex-1 border-amber-200 text-amber-700 hover:bg-amber-50"
+                        className="flex-1 border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-800"
                       >
                         <Edit className="w-4 h-4 mr-1" />
                         Edit

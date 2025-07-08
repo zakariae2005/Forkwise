@@ -168,6 +168,7 @@ export default function AuthForms() {
         window.location.href = "/dashboard"; // Or your homepage
       }, 1000);
     }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     setErrors({ general: "Something went wrong. Please try again." });
     setIsLoading(false);
