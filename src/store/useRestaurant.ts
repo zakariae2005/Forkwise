@@ -9,4 +9,5 @@ type RestaurantState = {
 export const useRestaurant = create<RestaurantState>((set) => ({
     restaurants: [],
     setRestaurants: (restaurants => set({ restaurants }))
+    
 }))
