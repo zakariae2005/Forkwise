@@ -12,7 +12,7 @@ const menuItems = [
     name: "Truffle Risotto",
     description: "Creamy Arborio rice with black truffle, parmesan, and fresh herbs",
     price: "$28",
-    image: "/placeholder.svg?height=300&width=400",
+    image: "/images/m1.jpg",
     category: "Main Course",
   },
   {
@@ -20,7 +20,7 @@ const menuItems = [
     name: "Grilled Branzino",
     description: "Mediterranean sea bass with lemon, capers, and roasted vegetables",
     price: "$32",
-    image: "/placeholder.svg?height=300&width=400",
+    image: "/images/m3.jpg",
     category: "Seafood",
   },
   {
@@ -28,7 +28,7 @@ const menuItems = [
     name: "Osso Buco",
     description: "Slow-braised veal shank with saffron risotto and gremolata",
     price: "$36",
-    image: "/placeholder.svg?height=300&width=400",
+    image: "/images/m5.jpg",
     category: "Main Course",
   },
   {
@@ -36,7 +36,7 @@ const menuItems = [
     name: "Tiramisu",
     description: "Classic Italian dessert with espresso-soaked ladyfingers",
     price: "$12",
-    image: "/placeholder.svg?height=300&width=400",
+    image: "/images/m2.jpg",
     category: "Dessert",
   },
   {
@@ -44,7 +44,7 @@ const menuItems = [
     name: "Burrata Caprese",
     description: "Fresh burrata with heirloom tomatoes, basil, and aged balsamic",
     price: "$18",
-    image: "/placeholder.svg?height=300&width=400",
+    image: "/images/m4.jpg",
     category: "Appetizer",
   },
   {
@@ -52,7 +52,7 @@ const menuItems = [
     name: "Lobster Ravioli",
     description: "House-made pasta filled with lobster in a light cream sauce",
     price: "$34",
-    image: "/placeholder.svg?height=300&width=400",
+    image: "/images/m6.jpg",
     category: "Pasta",
   },
 ]

@@ -34,7 +34,7 @@ export default function RestaurantHero({
       {/* Background Image with Overlay */}
       <div className="absolute inset-0 z-0">
         <Image
-          src="/placeholder.svg?height=800&width=1600"
+          src="/images/hero.jpg"
           alt="Restaurant interior"
           fill
           className="object-cover"

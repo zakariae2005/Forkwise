@@ -24,7 +24,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
 
-  Restaurant Restaurant[] @relation("UserRestaurant")
+  restaurant Restaurant[] @relation("UserRestaurant")
 
 
   createdAt     DateTime @default(now())
@@ -100,6 +100,9 @@ model Income {
 
   restaurantId  String
   restaurant    Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Expense {
@@ -110,6 +113,9 @@ model Expense {
 
   restaurantId  String
   restaurant    Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model MenuItem {
@@ -120,9 +126,12 @@ model MenuItem {
   category      String?
   imageUrl      String?
   createdAt     DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   restaurantId  String
   restaurant    Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  
 }
 
 model OpeningHour {
@@ -140,6 +149,7 @@ model Promotion {
   message       String
   active        Boolean @default(true)
   createdAt     DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   restaurantId  String
   restaurant    Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)

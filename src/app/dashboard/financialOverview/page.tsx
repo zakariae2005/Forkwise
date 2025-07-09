@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { CalendarDays, DollarSign, Plus, TrendingDown, TrendingUp, Filter, Download } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -17,6 +17,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
+import { useIncome } from "@/store/useIncome"
+import { toast } from "sonner"
+import { IncomeData } from "@/types/income"
 
 interface FinancialEntry {
   id: string
@@ -28,6 +31,62 @@ interface FinancialEntry {
 }
 
 export default function FinancialOverview() {
+
+  const { incomes, isLoading, error, fetchIncomes, createIncome } = useIncome()
+  
+  
+  useEffect(() => {
+    fetchIncomes()
+  }, [fetchIncomes])
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error)
+    }
+  }, [error])
+
+  const [formData, setFormData] = useState<IncomeData>({
+    value: 0,
+    note: "",
+    date: new Date(),
+    
+  })
+
+  const [errors, setErrors] = useState<Record<string, string>>({})
+
+
+    useEffect(() => {
+    if (incomes) {
+      setFormData({
+        value: incomes.value.toString(),
+        note: incomes.note || "",
+        date: incomes.date
+      })
+    } else {
+      setFormData({
+        value: 0,
+        note: "",
+        date: new Date,
+        
+      })
+    }
+    setErrors({})
+  }, [product, open])
+  const handleAddProduct = async (formData: IncomeData) => {
+    try {
+      await createIncome({
+        value: parseFloat(formData.value),
+        note: formData.note,
+        date: formData.date,
+      })
+      toast.success("Income added successfully!")
+      
+    } catch (error) {
+      toast.error("Failed to add income")
+    }
+  }
+
+   
   const [entries, setEntries] = useState<FinancialEntry[]>([
     {
       id: "1",
@@ -72,12 +131,7 @@ export default function FinancialOverview() {
   ])
 
   const [activeTab, setActiveTab] = useState<"income" | "expense">("income")
-  const [formData, setFormData] = useState({
-    value: "",
-    note: "",
-    date: new Date(),
-    category: "",
-  })
+  
   const [dateFilter, setDateFilter] = useState<Date | undefined>()
 
   const currentMonth = new Date().getMonth()
@@ -99,22 +153,7 @@ export default function FinancialOverview() {
 
   const netProfit = monthlyIncome - monthlyExpenses
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!formData.value) return
-
-    const newEntry: FinancialEntry = {
-      id: Date.now().toString(),
-      type: activeTab,
-      value: Number.parseFloat(formData.value),
-      note: formData.note,
-      date: formData.date,
-      category: formData.category,
-    }
-
-    setEntries([newEntry, ...entries])
-    setFormData({ value: "", note: "", date: new Date(), category: "" })
-  }
+  
 
   const filteredEntries = entries
     .filter((entry) => entry.type === activeTab)
@@ -207,7 +246,7 @@ export default function FinancialOverview() {
                   </TabsTrigger>
                 </TabsList>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleAddProduct} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="value">Amount ($)</Label>
                     <Input
@@ -222,24 +261,7 @@ export default function FinancialOverview() {
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="category">Category</Label>
-                    <Select
-                      value={formData.category}
-                      onValueChange={(value) => setFormData({ ...formData, category: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {(activeTab === "income" ? incomeCategories : expenseCategories).map((category) => (
-                          <SelectItem key={category} value={category}>
-                            {category}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  
 
                   <div className="space-y-2">
                     <Label htmlFor="note">Note (Optional)</Label>
@@ -337,41 +359,41 @@ export default function FinancialOverview() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredEntries.length === 0 ? (
+                    {incomes.length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={4} className="text-center py-8 text-slate-500">
                           No {activeTab} records found
                         </TableCell>
                       </TableRow>
                     ) : (
-                      filteredEntries.map((entry) => (
-                        <TableRow key={entry.id} className="hover:bg-slate-50">
+                      incomes.map((income) => (
+                        <TableRow key={income.id} className="hover:bg-slate-50">
                           <TableCell>
                             <div
-                              className={cn(
-                                "font-semibold text-lg",
-                                entry.type === "income" ? "text-emerald-600" : "text-red-600",
-                              )}
+                              // className={cn(
+                              //   "font-semibold text-lg",
+                              //   entry.type === "income" ? "text-emerald-600" : "text-red-600",
+                              // )}
                             >
-                              {entry.type === "income" ? "+" : "-"}${entry.value.toLocaleString()}
+                              ${income.value.toLocaleString()}
                             </div>
                           </TableCell>
                           <TableCell>
                             <Badge
                               variant="secondary"
-                              className={cn(
-                                entry.type === "income" ? "bg-emerald-100 text-emerald-800" : "bg-red-100 text-red-800",
-                              )}
+                              // className={cn(
+                              //   income.type === "income" ? "bg-emerald-100 text-emerald-800" : "bg-red-100 text-red-800",
+                              // )}
                             >
-                              {entry.category || "Uncategorized"}
+                              {/* {entry.category || "Uncategorized"} */}
                             </Badge>
                           </TableCell>
                           <TableCell className="max-w-xs">
-                            <div className="truncate" title={entry.note}>
-                              {entry.note || "No description"}
+                            <div className="truncate" title={income.note}>
+                              {income.note || "No description"}
                             </div>
                           </TableCell>
-                          <TableCell className="text-slate-600">📅 {format(entry.date, "MMM dd, yyyy")}</TableCell>
+                          <TableCell className="text-slate-600">📅 {format(income.date, "MMM dd, yyyy")}</TableCell>
                         </TableRow>
                       ))
                     )}
