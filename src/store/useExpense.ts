@@ -32,10 +32,17 @@ export const useExpense = create<ExpenseState>((set) => ({
       if (!response.ok) {
         throw new Error('Failed to fetch expenses')
       }
-      const expenses = await response.json()
+      const data = await response.json()
+      // Ensure we always set an array
+      const expenses = Array.isArray(data) ? data : []
       set({ expenses, isLoading: false })
     } catch (error) {
-      set({ error: error instanceof Error ? error.message : 'Unknown error', isLoading: false })
+      console.error('Error fetching expenses:', error)
+      set({ 
+        error: error instanceof Error ? error.message : 'Unknown error', 
+        isLoading: false,
+        expenses: [] // Ensure expenses is always an array
+      })
     }
   },
 
@@ -57,10 +64,11 @@ export const useExpense = create<ExpenseState>((set) => ({
       
       const newExpense = await response.json()
       set(state => ({ 
-        expenses: [newExpense, ...state.expenses], 
+        expenses: Array.isArray(state.expenses) ? [newExpense, ...state.expenses] : [newExpense], 
         isLoading: false 
       }))
     } catch (error) {
+      console.error('Error creating expense:', error)
       set({ error: error instanceof Error ? error.message : 'Unknown error', isLoading: false })
       throw error
     }

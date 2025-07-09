@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
+
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -63,19 +64,19 @@ export default function FinancialOverview() {
   const currentMonth = new Date().getMonth()
   const currentYear = new Date().getFullYear()
 
-  const monthlyIncome = incomes
+  const monthlyIncome = Array.isArray(incomes) ? incomes
     .filter((income) => {
       const incomeDate = new Date(income.date)
       return incomeDate.getMonth() === currentMonth && incomeDate.getFullYear() === currentYear
     })
-    .reduce((sum, income) => sum + income.value, 0)
+    .reduce((sum, income) => sum + income.value, 0) : 0
 
-  const monthlyExpenses = expenses
+  const monthlyExpenses = Array.isArray(expenses) ? expenses
     .filter((expense) => {
       const expenseDate = new Date(expense.date)
       return expenseDate.getMonth() === currentMonth && expenseDate.getFullYear() === currentYear
     })
-    .reduce((sum, expense) => sum + expense.value, 0)
+    .reduce((sum, expense) => sum + expense.value, 0) : 0
 
   const netProfit = monthlyIncome - monthlyExpenses
 
@@ -113,9 +114,14 @@ export default function FinancialOverview() {
   }
 
   // Get filtered entries based on active tab
-
   const getFilteredEntries = () => {
     const entries = activeTab === "income" ? incomes : expenses
+    
+    // Ensure entries is an array
+    if (!Array.isArray(entries)) {
+      return []
+    }
+    
     return entries
       .filter((entry) => {
         if (!dateFilter) return true
@@ -131,7 +137,7 @@ export default function FinancialOverview() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 md:p-6">
       <div className="mx-auto max-w-7xl space-y-6">
-        
+        {/* Header */}
         <div className="text-center space-y-2">
           <h1 className="text-3xl md:text-4xl font-bold text-slate-800 flex items-center justify-center gap-2">
             <DollarSign className="h-8 w-8 text-emerald-600" />
