@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useEffect, useState } from "react"
 import { CalendarDays, DollarSign, Plus, TrendingDown, TrendingUp, Filter, Download } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -10,158 +9,123 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
-import { Badge } from "@/components/ui/badge"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
 import { useIncome } from "@/store/useIncome"
+import { useExpense } from "@/store/useExpense"
 import { toast } from "sonner"
 import { IncomeData } from "@/types/income"
-
-interface FinancialEntry {
-  id: string
-  type: "income" | "expense"
-  value: number
-  note: string
-  date: Date
-  category?: string
-}
+import { ExpenseData } from "@/types/expense"
 
 export default function FinancialOverview() {
-
-  const { incomes, isLoading, error, fetchIncomes, createIncome } = useIncome()
+  const { incomes, isLoading: incomeLoading, error: incomeError, fetchIncomes, createIncome } = useIncome()
+  const { expenses, isLoading: expenseLoading, error: expenseError, fetchExpenses, createExpense } = useExpense()
   
+  const [activeTab, setActiveTab] = useState<"income" | "expense">("income")
+  const [dateFilter, setDateFilter] = useState<Date | undefined>()
   
-  useEffect(() => {
-    fetchIncomes()
-  }, [fetchIncomes])
-
-  useEffect(() => {
-    if (error) {
-      toast.error(error)
-    }
-  }, [error])
-
-  const [formData, setFormData] = useState<IncomeData>({
+  // Form data state
+  const [formData, setFormData] = useState<IncomeData | ExpenseData>({
     value: 0,
     note: "",
     date: new Date(),
-    
   })
 
-  const [errors, setErrors] = useState<Record<string, string>>({})
+  // Fetch data on component mount
+  useEffect(() => {
+    fetchIncomes()
+    fetchExpenses()
+  }, [fetchIncomes, fetchExpenses])
 
-
-    useEffect(() => {
-    if (incomes) {
-      setFormData({
-        value: incomes.value.toString(),
-        note: incomes.note || "",
-        date: incomes.date
-      })
-    } else {
-      setFormData({
-        value: 0,
-        note: "",
-        date: new Date,
-        
-      })
+  // Handle errors
+  useEffect(() => {
+    if (incomeError) {
+      toast.error(`Income Error: ${incomeError}`)
     }
-    setErrors({})
-  }, [product, open])
-  const handleAddProduct = async (formData: IncomeData) => {
-    try {
-      await createIncome({
-        value: parseFloat(formData.value),
-        note: formData.note,
-        date: formData.date,
-      })
-      toast.success("Income added successfully!")
-      
-    } catch (error) {
-      toast.error("Failed to add income")
+    if (expenseError) {
+      toast.error(`Expense Error: ${expenseError}`)
     }
-  }
+  }, [incomeError, expenseError])
 
-   
-  const [entries, setEntries] = useState<FinancialEntry[]>([
-    {
-      id: "1",
-      type: "income",
-      value: 2500,
-      note: "Daily sales - lunch service",
-      date: new Date(2024, 0, 15),
-      category: "Sales",
-    },
-    {
-      id: "2",
-      type: "expense",
-      value: 800,
-      note: "Fresh ingredients from market",
-      date: new Date(2024, 0, 15),
-      category: "Ingredients",
-    },
-    {
-      id: "3",
-      type: "income",
-      value: 1800,
-      note: "Evening service revenue",
-      date: new Date(2024, 0, 14),
-      category: "Sales",
-    },
-    {
-      id: "4",
-      type: "expense",
-      value: 450,
-      note: "Staff wages - part time",
-      date: new Date(2024, 0, 14),
-      category: "Staff",
-    },
-    {
-      id: "5",
-      type: "expense",
-      value: 200,
-      note: "Electricity bill",
-      date: new Date(2024, 0, 13),
-      category: "Utilities",
-    },
-  ])
+  // Reset form when tab changes
+  useEffect(() => {
+    setFormData({
+      value: 0,
+      note: "",
+      date: new Date(),
+    })
+  }, [activeTab])
 
-  const [activeTab, setActiveTab] = useState<"income" | "expense">("income")
-  
-  const [dateFilter, setDateFilter] = useState<Date | undefined>()
-
+  // Calculate monthly totals
   const currentMonth = new Date().getMonth()
   const currentYear = new Date().getFullYear()
 
-  const monthlyIncome = entries
-    .filter(
-      (entry) =>
-        entry.type === "income" && entry.date.getMonth() === currentMonth && entry.date.getFullYear() === currentYear,
-    )
-    .reduce((sum, entry) => sum + entry.value, 0)
+  const monthlyIncome = incomes
+    .filter((income) => {
+      const incomeDate = new Date(income.date)
+      return incomeDate.getMonth() === currentMonth && incomeDate.getFullYear() === currentYear
+    })
+    .reduce((sum, income) => sum + income.value, 0)
 
-  const monthlyExpenses = entries
-    .filter(
-      (entry) =>
-        entry.type === "expense" && entry.date.getMonth() === currentMonth && entry.date.getFullYear() === currentYear,
-    )
-    .reduce((sum, entry) => sum + entry.value, 0)
+  const monthlyExpenses = expenses
+    .filter((expense) => {
+      const expenseDate = new Date(expense.date)
+      return expenseDate.getMonth() === currentMonth && expenseDate.getFullYear() === currentYear
+    })
+    .reduce((sum, expense) => sum + expense.value, 0)
 
   const netProfit = monthlyIncome - monthlyExpenses
 
-  
+  // Handle form submission
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    try {
+      if (activeTab === "income") {
+        await createIncome({
+          value: typeof formData.value === 'string' ? parseFloat(formData.value) : formData.value,
+          note: formData.note,
+          date: formData.date,
+        })
+        toast.success("Income added successfully!")
+      } else {
+        await createExpense({
+          value: typeof formData.value === 'string' ? parseFloat(formData.value) : formData.value,
+          note: formData.note,
+          date: formData.date,
+        })
+        toast.success("Expense added successfully!")
+      }
+      
+      // Reset form
+      setFormData({
+        value: 0,
+        note: "",
+        date: new Date(),
+      })
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
+      toast.error(`Failed to add ${activeTab}`)
+    }
+  }
 
-  const filteredEntries = entries
-    .filter((entry) => entry.type === activeTab)
-    .filter((entry) => !dateFilter || entry.date.toDateString() === dateFilter.toDateString())
-    .sort((a, b) => b.date.getTime() - a.date.getTime())
+  // Get filtered entries based on active tab
+  const getFilteredEntries = () => {
+    const entries = activeTab === "income" ? incomes : expenses
+    return entries
+      .filter((entry) => {
+        if (!dateFilter) return true
+        const entryDate = new Date(entry.date)
+        return entryDate.toDateString() === dateFilter.toDateString()
+      })
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  }
 
-  const incomeCategories = ["Sales", "Catering", "Delivery", "Events", "Other"]
-  const expenseCategories = ["Ingredients", "Staff", "Utilities", "Rent", "Equipment", "Marketing", "Other"]
+  const filteredEntries = getFilteredEntries()
+  const isLoading = incomeLoading || expenseLoading
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 md:p-6">
@@ -184,7 +148,7 @@ export default function FinancialOverview() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-emerald-700">${monthlyIncome.toLocaleString()}</div>
-              <p className="text-xs text-emerald-600 mt-1">+12% from last month</p>
+              <p className="text-xs text-emerald-600 mt-1">Current month total</p>
             </CardContent>
           </Card>
 
@@ -195,7 +159,7 @@ export default function FinancialOverview() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-red-700">${monthlyExpenses.toLocaleString()}</div>
-              <p className="text-xs text-red-600 mt-1">+5% from last month</p>
+              <p className="text-xs text-red-600 mt-1">Current month total</p>
             </CardContent>
           </Card>
 
@@ -246,7 +210,7 @@ export default function FinancialOverview() {
                   </TabsTrigger>
                 </TabsList>
 
-                <form onSubmit={handleAddProduct} className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="value">Amount ($)</Label>
                     <Input
@@ -255,13 +219,11 @@ export default function FinancialOverview() {
                       step="0.01"
                       placeholder="0.00"
                       value={formData.value}
-                      onChange={(e) => setFormData({ ...formData, value: e.target.value })}
+                      onChange={(e) => setFormData({ ...formData, value: parseFloat(e.target.value) || 0 })}
                       className="text-lg font-semibold"
                       required
                     />
                   </div>
-
-                  
 
                   <div className="space-y-2">
                     <Label htmlFor="note">Note (Optional)</Label>
@@ -302,13 +264,14 @@ export default function FinancialOverview() {
 
                   <Button
                     type="submit"
+                    disabled={isLoading}
                     className={cn(
                       "w-full font-semibold",
                       activeTab === "income" ? "bg-emerald-600 hover:bg-emerald-700" : "bg-red-600 hover:bg-red-700",
                     )}
                   >
                     <Plus className="mr-2 h-4 w-4" />
-                    Add {activeTab === "income" ? "Income" : "Expense"}
+                    {isLoading ? "Adding..." : `Add ${activeTab === "income" ? "Income" : "Expense"}`}
                   </Button>
                 </form>
               </Tabs>
@@ -353,47 +316,44 @@ export default function FinancialOverview() {
                   <TableHeader>
                     <TableRow className="bg-slate-50">
                       <TableHead className="font-semibold">Amount</TableHead>
-                      <TableHead className="font-semibold">Category</TableHead>
                       <TableHead className="font-semibold">Note</TableHead>
                       <TableHead className="font-semibold">Date</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {incomes.length === 0 ? (
+                    {isLoading ? (
                       <TableRow>
-                        <TableCell colSpan={4} className="text-center py-8 text-slate-500">
+                        <TableCell colSpan={3} className="text-center py-8 text-slate-500">
+                          Loading...
+                        </TableCell>
+                      </TableRow>
+                    ) : filteredEntries.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={3} className="text-center py-8 text-slate-500">
                           No {activeTab} records found
                         </TableCell>
                       </TableRow>
                     ) : (
-                      incomes.map((income) => (
-                        <TableRow key={income.id} className="hover:bg-slate-50">
+                      filteredEntries.map((entry) => (
+                        <TableRow key={entry.id} className="hover:bg-slate-50">
                           <TableCell>
                             <div
-                              // className={cn(
-                              //   "font-semibold text-lg",
-                              //   entry.type === "income" ? "text-emerald-600" : "text-red-600",
-                              // )}
+                              className={cn(
+                                "font-semibold text-lg",
+                                activeTab === "income" ? "text-emerald-600" : "text-red-600",
+                              )}
                             >
-                              ${income.value.toLocaleString()}
+                              ${entry.value.toLocaleString()}
                             </div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge
-                              variant="secondary"
-                              // className={cn(
-                              //   income.type === "income" ? "bg-emerald-100 text-emerald-800" : "bg-red-100 text-red-800",
-                              // )}
-                            >
-                              {/* {entry.category || "Uncategorized"} */}
-                            </Badge>
                           </TableCell>
                           <TableCell className="max-w-xs">
-                            <div className="truncate" title={income.note}>
-                              {income.note || "No description"}
+                            <div className="truncate" title={entry.note}>
+                              {entry.note || "No description"}
                             </div>
                           </TableCell>
-                          <TableCell className="text-slate-600">📅 {format(income.date, "MMM dd, yyyy")}</TableCell>
+                          <TableCell className="text-slate-600">
+                            📅 {format(new Date(entry.date), "MMM dd, yyyy")}
+                          </TableCell>
                         </TableRow>
                       ))
                     )}

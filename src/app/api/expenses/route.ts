@@ -17,7 +17,7 @@ export async function GET() {
         if (!user || !user.restaurant.length) {
             return NextResponse.json({ message: 'User or Restaurant not found'}, { status: 404 })
         }
-        const incomes = await prisma.income.findMany({
+        const expenses = await prisma.expense.findMany({
             where: {
                 restaurantId: user.restaurant[0].id
             },
@@ -25,9 +25,9 @@ export async function GET() {
                 createdAt: 'desc'
             }
         })
-        return NextResponse.json(incomes)
+        return NextResponse.json(expenses)
     } catch (error) {
-      console.error('Error fetching incomes:', error)
+      console.error('Error fetching expenses:', error)
       return NextResponse.json({ message: 'Internal server error' }, { status: 500 })
   }
 }
@@ -55,7 +55,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ message: 'User or restaurant not found' }, { status: 404 })
         }
 
-        const income = await prisma.income.create({
+        const expense = await prisma.expense.create({
             data: {
                 value: parseFloat(value),
                 note,
@@ -63,9 +63,9 @@ export async function POST(req: Request) {
                 restaurantId: user.restaurant[0].id
             }
         })
-        return NextResponse.json(income, { status: 201 })
+        return NextResponse.json(expense, { status: 201 })
     } catch (error) {
-       console.error('Income creation error:', error)
+       console.error('Expens creation error:', error)
        return NextResponse.json({ message: 'Internal server error' }, { status: 500 })
     }
 }
