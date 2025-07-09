@@ -113,6 +113,7 @@ export default function FinancialOverview() {
   }
 
   // Get filtered entries based on active tab
+
   const getFilteredEntries = () => {
     const entries = activeTab === "income" ? incomes : expenses
     return entries
@@ -130,7 +131,7 @@ export default function FinancialOverview() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 md:p-6">
       <div className="mx-auto max-w-7xl space-y-6">
-        {/* Header */}
+        
         <div className="text-center space-y-2">
           <h1 className="text-3xl md:text-4xl font-bold text-slate-800 flex items-center justify-center gap-2">
             <DollarSign className="h-8 w-8 text-emerald-600" />
