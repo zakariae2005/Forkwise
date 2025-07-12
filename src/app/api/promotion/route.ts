@@ -16,13 +16,13 @@ export async function GET() {
         if (!user || !user.restaurant.length) {
             return NextResponse.json({ message: 'User or Restaurant not found' }, { status: 404 })
         }
-        const menus = await prisma.menuItem.findMany({
+        const promotions = await prisma.promotion.findMany({
             where: { restaurantId: user.restaurant[0].id },
             orderBy: { createdAt: 'desc' }
         })
-        return NextResponse.json(menus)
+        return NextResponse.json(promotions)
     } catch (error) {
-        console.error('Error fetching menus:', error)
+        console.error('Error fetching promotions:', error)
         return NextResponse.json({ message: 'Internal server error' }, { status: 500 })
     }
 }
@@ -34,12 +34,11 @@ export async function POST(req: Request) {
             return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
         }
         const body = await req.json()
-        const { name, price, description, category, imageUrl } = body
+        const { message, active } = body
         
-        // Validate required fields for menu items
-        if (!name || price === undefined || price === null) {
+        if (!message || active === undefined) {
             return NextResponse.json({ 
-                message: "Missing required fields: name and price are required" 
+                message: "Missing required fields: message and active are required" 
             }, { status: 400 })
         }
         
@@ -52,21 +51,17 @@ export async function POST(req: Request) {
             return NextResponse.json({ message: 'User or restaurant not found' }, { status: 404 })
         }
         
-        // Create menu item with correct fields
-        const menuItem = await prisma.menuItem.create({
+        const promotion = await prisma.promotion.create({
             data: {
-                name,
-                price: Number(price),
-                description: description || null,
-                category: category || null,
-                imageUrl: imageUrl || null,
+                message,
+                active: Boolean(active),
                 restaurantId: user.restaurant[0].id       
             }
         })
         
-        return NextResponse.json(menuItem, { status: 201 })
+        return NextResponse.json(promotion, { status: 201 })
     } catch (error) {
-        console.error('Menu creation error:', error)
+        console.error('Promotion creation error:', error)
         return NextResponse.json({ message: 'Internal server error' }, { status: 500 })
     }
 }

@@ -22,86 +22,148 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { useMenu } from "@/store/useMenu"
+import { usePromotion } from "@/store/usePromotion"
 import Image from "next/image"
 import { toast } from "sonner"
 import { Menu } from "@/types/menu"
-
-const promotions = [
-  {
-    id: 1,
-    message: "Happy Hour - 50% off all appetizers",
-    active: true,
-    createdAt: "2024-01-15",
-    startDate: "2024-01-15",
-    endDate: "2024-02-15",
-  },
-  {
-    id: 2,
-    message: "Weekend Special - Free dessert with main course",
-    active: true,
-    createdAt: "2024-01-10",
-    startDate: "2024-01-12",
-    endDate: "2024-01-31",
-  },
-  {
-    id: 3,
-    message: "Valentine's Day - Romantic dinner for two",
-    active: false,
-    createdAt: "2024-01-08",
-    startDate: "2024-02-14",
-    endDate: "2024-02-14",
-  },
-]
-
-
-type Promotion = {
-  id: number
-  message: string
-  active: boolean
-  createdAt: string
-  startDate: string
-  endDate: string
-}
+import { Promotion } from "@/types/promotion"
 
 export default function RestaurantDashboard() {
   const { menus, fetchMenus, createMenu, updateMenu, deleteMenu } = useMenu()
+  const { promotions, fetchPromotions, createPromotion, updatePromotion, deletePromotion } = usePromotion()
+  
   const [editingMenuItem, setEditingMenuItem] = useState<Menu | null>(null)
+  const [editingPromotion, setEditingPromotion] = useState<Promotion | null>(null)
   const [isMenuDialogOpen, setIsMenuDialogOpen] = useState(false)
   const [isPromotionDialogOpen, setIsPromotionDialogOpen] = useState(false)
- 
-  const [editingPromotion, setEditingPromotion] = useState<Promotion | null>(null)
 
+  // Menu form state
   const [formData, setFormData] = useState({
-  name: "",
-  price: 0,
-  description: "",
-  category: "",
-  imageUrl: ""
-})
+    name: "",
+    price: 0,
+    description: "",
+    category: "",
+    imageUrl: ""
+  })
 
- const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault()
-  try {
-    if (editingMenuItem) {
-      await updateMenu(editingMenuItem.id, {
-        name: formData.name,
-        price: typeof formData.price === 'string' ? parseFloat(formData.price) : formData.price,
-        description: formData.description,
-        category: formData.category,
-        imageUrl: formData.imageUrl
+  // Promotion form state
+  const [promotionFormData, setPromotionFormData] = useState({
+    message: "",
+    active: false
+  })
+
+  // Menu form handlers
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      if (editingMenuItem) {
+        await updateMenu(editingMenuItem.id, {
+          name: formData.name,
+          price: typeof formData.price === 'string' ? parseFloat(formData.price) : formData.price,
+          description: formData.description,
+          category: formData.category,
+          imageUrl: formData.imageUrl
+        })
+        toast.success("Menu updated successfully!")
+      } else {
+        await createMenu({
+          name: formData.name,
+          price: typeof formData.price === 'string' ? parseFloat(formData.price) : formData.price,
+          description: formData.description,
+          category: formData.category,
+          imageUrl: formData.imageUrl
+        })
+        toast.success("Menu added successfully!")
+      }
+      
+      setFormData({
+        name: "",
+        price: 0,
+        description: "",
+        category: "",
+        imageUrl: "",
       })
-      toast.success("Menu updated successfully!")
-    } else {
-      await createMenu({
-        name: formData.name,
-        price: typeof formData.price === 'string' ? parseFloat(formData.price) : formData.price,
-        description: formData.description,
-        category: formData.category,
-        imageUrl: formData.imageUrl
-      })
-      toast.success("Menu added successfully!")
+      setEditingMenuItem(null)
+      setIsMenuDialogOpen(false)
+    } catch (error) {
+      toast.error(`Failed to ${editingMenuItem ? 'update' : 'add'} menu`)
     }
-    
+  }
+
+  // Promotion form handlers
+  const handlePromotionSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      if (editingPromotion) {
+        await updatePromotion(editingPromotion.id, {
+          message: promotionFormData.message,
+          active: promotionFormData.active
+        })
+        toast.success("Promotion updated successfully!")
+      } else {
+        await createPromotion({
+          message: promotionFormData.message,
+          active: promotionFormData.active
+        })
+        toast.success("Promotion added successfully!")
+      }
+      
+      setPromotionFormData({
+        message: "",
+        active: false
+      })
+      setEditingPromotion(null)
+      setIsPromotionDialogOpen(false)
+    } catch (error) {
+      toast.error(`Failed to ${editingPromotion ? 'update' : 'add'} promotion`)
+    }
+  }
+
+  const handleEditMenuItem = (menu: Menu) => {
+    setEditingMenuItem(menu)
+    setFormData({
+      name: menu.name,
+      price: menu.price,
+      description: menu.description || "",
+      category: menu.category || "",
+      imageUrl: menu.imageUrl || ""
+    })
+    setIsMenuDialogOpen(true)
+  }
+
+  const handleEditPromotion = (promotion: Promotion) => {
+    setEditingPromotion(promotion)
+    setPromotionFormData({
+      message: promotion.message,
+      active: promotion.active
+    })
+    setIsPromotionDialogOpen(true)
+  }
+
+  const handleDeleteMenuItem = async (id: string) => {
+    if (window.confirm('Are you sure you want to delete this menu item?')) {
+      try {
+        await deleteMenu(id)
+        toast.success("Menu item deleted successfully!")
+      } catch (error) {
+        toast.error("Failed to delete menu item")
+      }
+    }
+  }
+
+  const handleDeletePromotion = async (id: string) => {
+    if (window.confirm('Are you sure you want to delete this promotion?')) {
+      try {
+        await deletePromotion(id)
+        toast.success("Promotion deleted successfully!")
+      } catch (error) {
+        toast.error("Failed to delete promotion")
+      }
+    }
+  }
+
+  const resetMenuDialog = () => {
+    setEditingMenuItem(null)
     setFormData({
       name: "",
       price: 0,
@@ -109,65 +171,22 @@ export default function RestaurantDashboard() {
       category: "",
       imageUrl: "",
     })
-    setEditingMenuItem(null)
     setIsMenuDialogOpen(false)
-  } catch (error) {
-    toast.error(`Failed to ${editingMenuItem ? 'update' : 'add'} menu`)
   }
-}
-
-const handleEditMenuItem = (menu: Menu) => {
-  setEditingMenuItem(menu)
-  setFormData({
-    name: menu.name,
-    price: menu.price,
-    description: menu.description || "",
-    category: menu.category || "",
-    imageUrl: menu.imageUrl || ""
-  })
-  setIsMenuDialogOpen(true)
-}
-
-// 6. Add handleDeleteMenuItem function
-const handleDeleteMenuItem = async (id: string) => {
-  if (window.confirm('Are you sure you want to delete this menu item?')) {
-    try {
-      await deleteMenu(id)
-      toast.success("Menu item deleted successfully!")
-    } catch (error) {
-      toast.error("Failed to delete menu item")
-    }
-  }
-}
-
-// 7. Update the resetMenuDialog function
-const resetMenuDialog = () => {
-  setEditingMenuItem(null)
-  setFormData({
-    name: "",
-    price: 0,
-    description: "",
-    category: "",
-    imageUrl: "",
-  })
-  setIsMenuDialogOpen(false)
-}
-
-
-const handleEditPromotion = (promotion: Promotion) => {
-  setEditingPromotion(promotion)
-  setIsPromotionDialogOpen(true)
-}
-
 
   const resetPromotionDialog = () => {
     setEditingPromotion(null)
+    setPromotionFormData({
+      message: "",
+      active: false
+    })
     setIsPromotionDialogOpen(false)
   }
 
   useEffect(() => {
     fetchMenus()
-  }, [fetchMenus])
+    fetchPromotions()
+  }, [fetchMenus, fetchPromotions])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
@@ -194,7 +213,7 @@ const handleEditPromotion = (promotion: Promotion) => {
 
           <Card className="bg-white/80 backdrop-blur-sm border-slate-200 hover:shadow-xl hover:shadow-emerald-100/50 transition-all duration-300">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-slate-700">Active Promotions </CardTitle>
+              <CardTitle className="text-sm font-medium text-slate-700">Active Promotions</CardTitle>
               <div className="p-2 bg-emerald-100 rounded-lg">
                 <Megaphone className="h-4 w-4 text-emerald-600" />
               </div>
@@ -213,7 +232,7 @@ const handleEditPromotion = (promotion: Promotion) => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-slate-900">
-                ${(menus.reduce((sum, item) => sum + item.price, 0) / menus.length).toFixed(2)}
+                ${menus.length > 0 ? (menus.reduce((sum, item) => sum + item.price, 0) / menus.length).toFixed(2) : '0.00'}
               </div>
             </CardContent>
           </Card>
@@ -265,105 +284,105 @@ const handleEditPromotion = (promotion: Promotion) => {
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[600px] bg-white">
-                 <DialogHeader>
-                  <DialogTitle className="text-slate-800">
-                    {editingMenuItem ? "Edit Menu Item" : "Add New Menu Item"}
-                  </DialogTitle>
-                  <DialogDescription className="text-slate-600">
-                    {editingMenuItem
-                      ? "Update the menu item details below."
-                      : "Fill in the details for your new menu item."}
-                  </DialogDescription>
-                </DialogHeader>
+                  <DialogHeader>
+                    <DialogTitle className="text-slate-800">
+                      {editingMenuItem ? "Edit Menu Item" : "Add New Menu Item"}
+                    </DialogTitle>
+                    <DialogDescription className="text-slate-600">
+                      {editingMenuItem
+                        ? "Update the menu item details below."
+                        : "Fill in the details for your new menu item."}
+                    </DialogDescription>
+                  </DialogHeader>
                   <form onSubmit={handleSubmit}>
-
-                  
-                  <div className="grid gap-4 py-4">
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="name" className="text-right text-slate-700">
-                        Name
-                      </Label>
-                      <Input
-                        id="name"
-                        value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value})}
-                        className="col-span-3 border-slate-200 focus:border-blue-400 focus:ring-blue-400"
-                      />
+                    <div className="grid gap-4 py-4">
+                      <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="name" className="text-right text-slate-700">
+                          Name
+                        </Label>
+                        <Input
+                          id="name"
+                          value={formData.name}
+                          onChange={(e) => setFormData({ ...formData, name: e.target.value})}
+                          className="col-span-3 border-slate-200 focus:border-blue-400 focus:ring-blue-400"
+                          required
+                        />
+                      </div>
+                      <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="price" className="text-right text-slate-700">
+                          Price
+                        </Label>
+                        <Input
+                          id="price"
+                          type="number"
+                          step="0.01"
+                          value={formData.price}
+                          onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) || 0})}
+                          className="col-span-3 border-slate-200 focus:border-blue-400 focus:ring-blue-400"
+                          required
+                        />
+                      </div>
+                      <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="category" className="text-right text-slate-700">
+                          Category
+                        </Label>
+                        <Select 
+                          value={formData.category} 
+                          onValueChange={(value) => setFormData({ ...formData, category: value })}
+                        >
+                          <SelectTrigger className="col-span-3 border-slate-200 focus:border-blue-400">
+                            <SelectValue placeholder="Select category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Pizza">Pizza</SelectItem>
+                            <SelectItem value="Seafood">Seafood</SelectItem>
+                            <SelectItem value="Salads">Salads</SelectItem>
+                            <SelectItem value="Steaks">Steaks</SelectItem>
+                            <SelectItem value="Appetizers">Appetizers</SelectItem>
+                            <SelectItem value="Desserts">Desserts</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="description" className="text-right text-slate-700">
+                          Description
+                        </Label>
+                        <Textarea
+                          id="description"
+                          value={formData.description}
+                          onChange={(e) => setFormData({ ...formData, description: e.target.value})}
+                          className="col-span-3 border-slate-200 focus:border-blue-400 focus:ring-blue-400"
+                        />
+                      </div>
+                      <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="image" className="text-right text-slate-700">
+                          Image URL
+                        </Label>
+                        <Input
+                          id="image"
+                          value={formData.imageUrl}
+                          onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value})}
+                          className="col-span-3 border-slate-200 focus:border-blue-400 focus:ring-blue-400"
+                        />
+                      </div>
                     </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="price" className="text-right text-slate-700">
-                        Price
-                      </Label>
-                      <Input
-                        id="price"
-                        type="number"
-                        step="0.01"
-                        value={formData.price}
-                        onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) || 0})}
-                        className="col-span-3 border-slate-200 focus:border-blue-400 focus:ring-blue-400"
-                      />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="category" className="text-right text-slate-700">
-                        Category
-                      </Label>
-                      <Select 
-  value={formData.category} 
-  onValueChange={(value) => setFormData({ ...formData, category: value })}
->
-  <SelectTrigger className="col-span-3 border-slate-200 focus:border-blue-400">
-    <SelectValue placeholder="Select category" />
-  </SelectTrigger>
-  <SelectContent>
-    <SelectItem value="Pizza">Pizza</SelectItem>
-    <SelectItem value="Seafood">Seafood</SelectItem>
-    <SelectItem value="Salads">Salads</SelectItem>
-    <SelectItem value="Steaks">Steaks</SelectItem>
-    <SelectItem value="Appetizers">Appetizers</SelectItem>
-    <SelectItem value="Desserts">Desserts</SelectItem>
-  </SelectContent>
-</Select>
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="description" className="text-right text-slate-700">
-                        Description
-                      </Label>
-                      <Textarea
-                        id="description"
-                         value={formData.description}
-                        onChange={(e) => setFormData({ ...formData, description: e.target.value})}
-                        className="col-span-3 border-slate-200 focus:border-blue-400 focus:ring-blue-400"
-                      />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="image" className="text-right text-slate-700">
-                        Image URL
-                      </Label>
-                      <Input
-                        id="image"
-                         value={formData.imageUrl}
-                        onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value})}
-                        className="col-span-3 border-slate-200 focus:border-blue-400 focus:ring-blue-400"
-                      />
-                    </div>
-                  </div>
-                  <DialogFooter>
-  <Button
-    variant="outline"
-    onClick={resetMenuDialog}
-    className="border-slate-200 text-slate-600 hover:bg-slate-50"
-  >
-    Cancel
-  </Button>
-  <Button 
-    type="submit" 
-    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
-  >
-    {editingMenuItem ? "Update Menu" : "Add Menu"}
-  </Button>
-</DialogFooter>
+                    <DialogFooter>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={resetMenuDialog}
+                        className="border-slate-200 text-slate-600 hover:bg-slate-50"
+                      >
+                        Cancel
+                      </Button>
+                      <Button 
+                        type="submit" 
+                        className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
+                      >
+                        {editingMenuItem ? "Update Menu" : "Add Menu"}
+                      </Button>
+                    </DialogFooter>
                   </form>
-                  
                 </DialogContent>
               </Dialog>
             </div>
@@ -371,18 +390,18 @@ const handleEditPromotion = (promotion: Promotion) => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {menus.map((menu) => (
                 <Card
-  key={menu.id}
-  className="pt-0 bg-white/90 backdrop-blur-sm border-slate-200 hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300 hover:-translate-y-1"
->
-  <div className="h-64 relative overflow-hidden rounded-t-lg">
-    <Image
-      fill
-      src={menu.imageUrl}
-      alt={menu.name}
-      className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-    />
-    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300" />
-  </div>
+                  key={menu.id}
+                  className="pt-0 bg-white/90 backdrop-blur-sm border-slate-200 hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300 hover:-translate-y-1"
+                >
+                  <div className="h-64 relative overflow-hidden rounded-t-lg">
+                    <Image
+                      fill
+                      src={menu.imageUrl}
+                      alt={menu.name}
+                      className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300" />
+                  </div>
                   <CardHeader className="pb-3">
                     <div className="flex justify-between items-start">
                       <CardTitle className="text-slate-800 text-lg">{menu.name}</CardTitle>
@@ -404,8 +423,6 @@ const handleEditPromotion = (promotion: Promotion) => {
                         <Edit className="w-4 h-4 mr-1" />
                         Edit
                       </Button>
-
-                      
                       <Button
                         size="sm"
                         variant="outline"
@@ -447,60 +464,49 @@ const handleEditPromotion = (promotion: Promotion) => {
                         : "Create a new promotion for your restaurant."}
                     </DialogDescription>
                   </DialogHeader>
-                  <div className="grid gap-4 py-4">
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="message" className="text-right text-slate-700">
-                        Message
-                      </Label>
-                      <Textarea
-                        id="message"
-                        defaultValue={editingPromotion?.message || ""}
-                        className="col-span-3 border-slate-200 focus:border-blue-400 focus:ring-blue-400"
-                      />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="active" className="text-right text-slate-700">
-                        Active
-                      </Label>
-                      <div className="col-span-3">
-                        <Switch defaultChecked={editingPromotion?.active || false} />
+                  <form onSubmit={handlePromotionSubmit}>
+                    <div className="grid gap-4 py-4">
+                      <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="message" className="text-right text-slate-700">
+                          Message
+                        </Label>
+                        <Textarea
+                          id="message"
+                          value={promotionFormData.message}
+                          onChange={(e) => setPromotionFormData({ ...promotionFormData, message: e.target.value })}
+                          className="col-span-3 border-slate-200 focus:border-blue-400 focus:ring-blue-400"
+                          required
+                        />
+                      </div>
+                      <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="active" className="text-right text-slate-700">
+                          Active
+                        </Label>
+                        <div className="col-span-3">
+                          <Switch 
+                            checked={promotionFormData.active} 
+                            onCheckedChange={(checked) => setPromotionFormData({ ...promotionFormData, active: checked })}
+                          />
+                        </div>
                       </div>
                     </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="startDate" className="text-right text-slate-700">
-                        Start Date
-                      </Label>
-                      <Input
-                        id="startDate"
-                        type="date"
-                        defaultValue={editingPromotion?.startDate || ""}
-                        className="col-span-3 border-slate-200 focus:border-blue-400 focus:ring-blue-400"
-                      />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="endDate" className="text-right text-slate-700">
-                        End Date
-                      </Label>
-                      <Input
-                        id="endDate"
-                        type="date"
-                        defaultValue={editingPromotion?.endDate || ""}
-                        className="col-span-3 border-slate-200 focus:border-blue-400 focus:ring-blue-400"
-                      />
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <Button
-                      variant="outline"
-                      onClick={resetPromotionDialog}
-                      className="border-slate-200 text-slate-600 hover:bg-slate-50"
-                    >
-                      Cancel
-                    </Button>
-                    <Button onClick={resetPromotionDialog} className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white">
-                      {editingPromotion ? "Update Promotion" : "Add Promotion"}
-                    </Button>
-                  </DialogFooter>
+                    <DialogFooter>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={resetPromotionDialog}
+                        className="border-slate-200 text-slate-600 hover:bg-slate-50"
+                      >
+                        Cancel
+                      </Button>
+                      <Button 
+                        type="submit" 
+                        className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
+                      >
+                        {editingPromotion ? "Update Promotion" : "Add Promotion"}
+                      </Button>
+                    </DialogFooter>
+                  </form>
                 </DialogContent>
               </Dialog>
             </div>
@@ -540,11 +546,8 @@ const handleEditPromotion = (promotion: Promotion) => {
                         <p className="text-slate-600">{new Date(promotion.createdAt).toLocaleDateString()}</p>
                       </div>
                       <div>
-                        <span className="text-slate-700 font-medium">Duration:</span>
-                        <p className="text-slate-600">
-                          {new Date(promotion.startDate).toLocaleDateString()} -{" "}
-                          {new Date(promotion.endDate).toLocaleDateString()}
-                        </p>
+                        <span className="text-slate-700 font-medium">Updated:</span>
+                        <p className="text-slate-600">{new Date(promotion.updatedAt).toLocaleDateString()}</p>
                       </div>
                     </div>
                     <div className="flex gap-2 pt-2">
@@ -560,6 +563,7 @@ const handleEditPromotion = (promotion: Promotion) => {
                       <Button
                         size="sm"
                         variant="outline"
+                        onClick={() => handleDeletePromotion(promotion.id)}
                         className="flex-1 border-red-200 text-red-600 hover:bg-red-50 bg-transparent"
                       >
                         <Trash2 className="w-4 h-4 mr-1" />
