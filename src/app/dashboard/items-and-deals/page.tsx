@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Plus, Edit, Trash2, ToggleLeft, ToggleRight, Calendar, DollarSign, Utensils, Megaphone } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -20,42 +21,10 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
-
-// Mock data
-const menuItems = [
-  {
-    id: 1,
-    name: "Margherita Pizza",
-    price: 18.99,
-    category: "Pizza",
-    description: "Fresh mozzarella, tomato sauce, and basil on our signature wood-fired crust",
-    image: "/placeholder.svg?height=200&width=300",
-  },
-  {
-    id: 2,
-    name: "Grilled Salmon",
-    price: 26.99,
-    category: "Seafood",
-    description: "Atlantic salmon with lemon herb butter, served with seasonal vegetables",
-    image: "/placeholder.svg?height=200&width=300",
-  },
-  {
-    id: 3,
-    name: "Caesar Salad",
-    price: 14.99,
-    category: "Salads",
-    description: "Crisp romaine lettuce, parmesan cheese, croutons, and our house Caesar dressing",
-    image: "/placeholder.svg?height=200&width=300",
-  },
-  {
-    id: 4,
-    name: "Beef Tenderloin",
-    price: 34.99,
-    category: "Steaks",
-    description: "8oz prime beef tenderloin with garlic mashed potatoes and red wine reduction",
-    image: "/placeholder.svg?height=200&width=300",
-  },
-]
+import { useMenu } from "@/store/useMenu"
+import Image from "next/image"
+import { toast } from "sonner"
+import { Menu } from "@/types/menu"
 
 const promotions = [
   {
@@ -84,14 +53,6 @@ const promotions = [
   },
 ]
 
-type MenuItem = {
-  id: number
-  name: string
-  price: number
-  category: string
-  description: string
-  image: string
-}
 
 type Promotion = {
   id: number
@@ -103,30 +64,110 @@ type Promotion = {
 }
 
 export default function RestaurantDashboard() {
+  const { menus, fetchMenus, createMenu, updateMenu, deleteMenu } = useMenu()
+  const [editingMenuItem, setEditingMenuItem] = useState<Menu | null>(null)
   const [isMenuDialogOpen, setIsMenuDialogOpen] = useState(false)
   const [isPromotionDialogOpen, setIsPromotionDialogOpen] = useState(false)
-  const [editingMenuItem, setEditingMenuItem] = useState<MenuItem | null>(null)
-const [editingPromotion, setEditingPromotion] = useState<Promotion | null>(null)
+ 
+  const [editingPromotion, setEditingPromotion] = useState<Promotion | null>(null)
 
-  const handleEditMenuItem = (item: MenuItem) => {
-  setEditingMenuItem(item)
+  const [formData, setFormData] = useState({
+  name: "",
+  price: 0,
+  description: "",
+  category: "",
+  imageUrl: ""
+})
+
+ const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault()
+  try {
+    if (editingMenuItem) {
+      await updateMenu(editingMenuItem.id, {
+        name: formData.name,
+        price: typeof formData.price === 'string' ? parseFloat(formData.price) : formData.price,
+        description: formData.description,
+        category: formData.category,
+        imageUrl: formData.imageUrl
+      })
+      toast.success("Menu updated successfully!")
+    } else {
+      await createMenu({
+        name: formData.name,
+        price: typeof formData.price === 'string' ? parseFloat(formData.price) : formData.price,
+        description: formData.description,
+        category: formData.category,
+        imageUrl: formData.imageUrl
+      })
+      toast.success("Menu added successfully!")
+    }
+    
+    setFormData({
+      name: "",
+      price: 0,
+      description: "",
+      category: "",
+      imageUrl: "",
+    })
+    setEditingMenuItem(null)
+    setIsMenuDialogOpen(false)
+  } catch (error) {
+    toast.error(`Failed to ${editingMenuItem ? 'update' : 'add'} menu`)
+  }
+}
+
+const handleEditMenuItem = (menu: Menu) => {
+  setEditingMenuItem(menu)
+  setFormData({
+    name: menu.name,
+    price: menu.price,
+    description: menu.description || "",
+    category: menu.category || "",
+    imageUrl: menu.imageUrl || ""
+  })
   setIsMenuDialogOpen(true)
 }
+
+// 6. Add handleDeleteMenuItem function
+const handleDeleteMenuItem = async (id: string) => {
+  if (window.confirm('Are you sure you want to delete this menu item?')) {
+    try {
+      await deleteMenu(id)
+      toast.success("Menu item deleted successfully!")
+    } catch (error) {
+      toast.error("Failed to delete menu item")
+    }
+  }
+}
+
+// 7. Update the resetMenuDialog function
+const resetMenuDialog = () => {
+  setEditingMenuItem(null)
+  setFormData({
+    name: "",
+    price: 0,
+    description: "",
+    category: "",
+    imageUrl: "",
+  })
+  setIsMenuDialogOpen(false)
+}
+
 
 const handleEditPromotion = (promotion: Promotion) => {
   setEditingPromotion(promotion)
   setIsPromotionDialogOpen(true)
 }
 
-  const resetMenuDialog = () => {
-    setEditingMenuItem(null)
-    setIsMenuDialogOpen(false)
-  }
 
   const resetPromotionDialog = () => {
     setEditingPromotion(null)
     setIsPromotionDialogOpen(false)
   }
+
+  useEffect(() => {
+    fetchMenus()
+  }, [fetchMenus])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
@@ -147,7 +188,7 @@ const handleEditPromotion = (promotion: Promotion) => {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-slate-900">{menuItems.length}</div>
+              <div className="text-2xl font-bold text-slate-900">{menus.length}</div>
             </CardContent>
           </Card>
 
@@ -172,7 +213,7 @@ const handleEditPromotion = (promotion: Promotion) => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-slate-900">
-                ${(menuItems.reduce((sum, item) => sum + item.price, 0) / menuItems.length).toFixed(2)}
+                ${(menus.reduce((sum, item) => sum + item.price, 0) / menus.length).toFixed(2)}
               </div>
             </CardContent>
           </Card>
@@ -186,7 +227,7 @@ const handleEditPromotion = (promotion: Promotion) => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-slate-900">
-                {new Set(menuItems.map((item) => item.category)).size}
+                {new Set(menus.map((menu) => menu.category)).size}
               </div>
             </CardContent>
           </Card>
@@ -224,16 +265,19 @@ const handleEditPromotion = (promotion: Promotion) => {
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[600px] bg-white">
-                  <DialogHeader>
-                    <DialogTitle className="text-slate-800">
-                      {editingMenuItem ? "Edit Menu Item" : "Add New Menu Item"}
-                    </DialogTitle>
-                    <DialogDescription className="text-slate-600">
-                      {editingMenuItem
-                        ? "Update the menu item details below."
-                        : "Fill in the details for your new menu item."}
-                    </DialogDescription>
-                  </DialogHeader>
+                 <DialogHeader>
+                  <DialogTitle className="text-slate-800">
+                    {editingMenuItem ? "Edit Menu Item" : "Add New Menu Item"}
+                  </DialogTitle>
+                  <DialogDescription className="text-slate-600">
+                    {editingMenuItem
+                      ? "Update the menu item details below."
+                      : "Fill in the details for your new menu item."}
+                  </DialogDescription>
+                </DialogHeader>
+                  <form onSubmit={handleSubmit}>
+
+                  
                   <div className="grid gap-4 py-4">
                     <div className="grid grid-cols-4 items-center gap-4">
                       <Label htmlFor="name" className="text-right text-slate-700">
@@ -241,7 +285,8 @@ const handleEditPromotion = (promotion: Promotion) => {
                       </Label>
                       <Input
                         id="name"
-                        defaultValue={editingMenuItem?.name || ""}
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value})}
                         className="col-span-3 border-slate-200 focus:border-blue-400 focus:ring-blue-400"
                       />
                     </div>
@@ -253,7 +298,8 @@ const handleEditPromotion = (promotion: Promotion) => {
                         id="price"
                         type="number"
                         step="0.01"
-                        defaultValue={editingMenuItem?.price || ""}
+                        value={formData.price}
+                        onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) || 0})}
                         className="col-span-3 border-slate-200 focus:border-blue-400 focus:ring-blue-400"
                       />
                     </div>
@@ -261,19 +307,22 @@ const handleEditPromotion = (promotion: Promotion) => {
                       <Label htmlFor="category" className="text-right text-slate-700">
                         Category
                       </Label>
-                      <Select defaultValue={editingMenuItem?.category || ""}>
-                        <SelectTrigger className="col-span-3 border-slate-200 focus:border-blue-400">
-                          <SelectValue placeholder="Select category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Pizza">Pizza</SelectItem>
-                          <SelectItem value="Seafood">Seafood</SelectItem>
-                          <SelectItem value="Salads">Salads</SelectItem>
-                          <SelectItem value="Steaks">Steaks</SelectItem>
-                          <SelectItem value="Appetizers">Appetizers</SelectItem>
-                          <SelectItem value="Desserts">Desserts</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <Select 
+  value={formData.category} 
+  onValueChange={(value) => setFormData({ ...formData, category: value })}
+>
+  <SelectTrigger className="col-span-3 border-slate-200 focus:border-blue-400">
+    <SelectValue placeholder="Select category" />
+  </SelectTrigger>
+  <SelectContent>
+    <SelectItem value="Pizza">Pizza</SelectItem>
+    <SelectItem value="Seafood">Seafood</SelectItem>
+    <SelectItem value="Salads">Salads</SelectItem>
+    <SelectItem value="Steaks">Steaks</SelectItem>
+    <SelectItem value="Appetizers">Appetizers</SelectItem>
+    <SelectItem value="Desserts">Desserts</SelectItem>
+  </SelectContent>
+</Select>
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                       <Label htmlFor="description" className="text-right text-slate-700">
@@ -281,7 +330,8 @@ const handleEditPromotion = (promotion: Promotion) => {
                       </Label>
                       <Textarea
                         id="description"
-                        defaultValue={editingMenuItem?.description || ""}
+                         value={formData.description}
+                        onChange={(e) => setFormData({ ...formData, description: e.target.value})}
                         className="col-span-3 border-slate-200 focus:border-blue-400 focus:ring-blue-400"
                       />
                     </div>
@@ -291,65 +341,75 @@ const handleEditPromotion = (promotion: Promotion) => {
                       </Label>
                       <Input
                         id="image"
-                        defaultValue={editingMenuItem?.image || ""}
+                         value={formData.imageUrl}
+                        onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value})}
                         className="col-span-3 border-slate-200 focus:border-blue-400 focus:ring-blue-400"
                       />
                     </div>
                   </div>
                   <DialogFooter>
-                    <Button
-                      variant="outline"
-                      onClick={resetMenuDialog}
-                      className="border-slate-200 text-slate-600 hover:bg-slate-50"
-                    >
-                      Cancel
-                    </Button>
-                    <Button onClick={resetMenuDialog} className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white">
-                      {editingMenuItem ? "Update Item" : "Add Item"}
-                    </Button>
-                  </DialogFooter>
+  <Button
+    variant="outline"
+    onClick={resetMenuDialog}
+    className="border-slate-200 text-slate-600 hover:bg-slate-50"
+  >
+    Cancel
+  </Button>
+  <Button 
+    type="submit" 
+    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
+  >
+    {editingMenuItem ? "Update Menu" : "Add Menu"}
+  </Button>
+</DialogFooter>
+                  </form>
+                  
                 </DialogContent>
               </Dialog>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {menuItems.map((item) => (
+              {menus.map((menu) => (
                 <Card
-                  key={item.id}
-                  className="bg-white/90 backdrop-blur-sm border-slate-200 hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300 hover:-translate-y-1"
-                >
-                  <div className="aspect-video relative overflow-hidden rounded-t-lg">
-                    <img
-                      src={item.image || "/placeholder.svg"}
-                      alt={item.name}
-                      className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300" />
-                  </div>
+  key={menu.id}
+  className="pt-0 bg-white/90 backdrop-blur-sm border-slate-200 hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300 hover:-translate-y-1"
+>
+  <div className="h-64 relative overflow-hidden rounded-t-lg">
+    <Image
+      fill
+      src={menu.imageUrl}
+      alt={menu.name}
+      className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+    />
+    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300" />
+  </div>
                   <CardHeader className="pb-3">
                     <div className="flex justify-between items-start">
-                      <CardTitle className="text-slate-800 text-lg">{item.name}</CardTitle>
+                      <CardTitle className="text-slate-800 text-lg">{menu.name}</CardTitle>
                       <Badge variant="secondary" className="bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 border-blue-200">
-                        {item.category}
+                        {menu.category}
                       </Badge>
                     </div>
-                    <div className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">${item.price}</div>
+                    <div className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">${menu.price}</div>
                   </CardHeader>
                   <CardContent className="pt-0">
-                    <p className="text-slate-600 text-sm mb-4 line-clamp-2">{item.description}</p>
+                    <p className="text-slate-600 text-sm mb-4 line-clamp-2">{menu.description}</p>
                     <div className="flex gap-2">
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => handleEditMenuItem(item)}
+                        onClick={() => handleEditMenuItem(menu)}
                         className="flex-1 border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-800"
                       >
                         <Edit className="w-4 h-4 mr-1" />
                         Edit
                       </Button>
+
+                      
                       <Button
                         size="sm"
                         variant="outline"
+                        onClick={() => handleDeleteMenuItem(menu.id)}
                         className="flex-1 border-red-200 text-red-600 hover:bg-red-50 bg-transparent"
                       >
                         <Trash2 className="w-4 h-4 mr-1" />
