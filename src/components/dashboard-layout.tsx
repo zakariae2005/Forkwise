@@ -2,9 +2,7 @@
 import {
   BarChart3,
   Bell,
-  Calendar,
   ChevronDown,
-  FileText,
   Home,
   LogOut,
   MessageSquare,
@@ -52,12 +50,15 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 
+import { useSession, signOut } from "next-auth/react"
+import { usePathname } from "next/navigation"
+
+
 const navigationItems = [
   {
     title: "Overview",
     icon: Home,
     url: "/dashboard",
-    isActive: true,
   },
   {
     title: "Financial",
@@ -75,29 +76,9 @@ const navigationItems = [
     url: "/messages",
     badge: "12",
   },
-  {
-    title: "Calendar",
-    icon: Calendar,
-    url: "/calendar",
-  },
-  {
-    title: "Documents",
-    icon: FileText,
-    url: "/documents",
-  },
 ]
 
 const toolsItems = [
-  {
-    title: "Integrations",
-    icon: Zap,
-    url: "/integrations",
-  },
-  {
-    title: "Security",
-    icon: Shield,
-    url: "/security",
-  },
   {
     title: "Settings",
     icon: Settings,
@@ -110,6 +91,8 @@ interface DashboardLayoutProps {
 }
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
+  const { data: session } = useSession()
+  const pathname = usePathname()
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20">
@@ -135,26 +118,32 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               </SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu className="space-y-1">
-                  {navigationItems.map((item) => (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton
-                        asChild
-                        isActive={item.isActive}
-                        className="group relative h-11 rounded-xl transition-all duration-200 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:shadow-sm data-[active=true]:bg-gradient-to-r data-[active=true]:from-blue-500 data-[active=true]:to-indigo-500 data-[active=true]:text-white data-[active=true]:shadow-lg data-[active=true]:shadow-blue-500/25"
-                      >
-                        <a href={item.url} className="flex items-center gap-3 px-3">
-                          <item.icon className="h-5 w-5 transition-colors" />
-                          <span className="font-medium">{item.title}</span>
-                          {item.badge && (
-                            <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-xs font-medium text-white group-data-[active=true]:bg-white group-data-[active=true]:text-blue-500">
-                              {item.badge}
-                            </span>
-                          )}
-                        </a>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
+ {navigationItems.map((item) => {
+  const isActive =
+    item.url === "/dashboard"
+      ? pathname === "/dashboard"
+      : pathname === item.url || pathname.startsWith(item.url + "/")
+    return (
+      <SidebarMenuItem key={item.title}>
+        <SidebarMenuButton
+          asChild
+          isActive={isActive}
+          className="group relative h-11 rounded-xl transition-all duration-200 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:shadow-sm data-[active=true]:bg-gradient-to-r data-[active=true]:from-blue-500 data-[active=true]:to-indigo-500 data-[active=true]:text-white data-[active=true]:shadow-lg data-[active=true]:shadow-blue-500/25"
+        >
+          <a href={item.url} className="flex items-center gap-3 px-3">
+            <item.icon className="h-5 w-5 transition-colors" />
+            <span className="font-medium">{item.title}</span>
+            {item.badge && (
+              <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-xs font-medium text-white group-data-[active=true]:bg-white group-data-[active=true]:text-blue-500">
+                {item.badge}
+              </span>
+            )}
+          </a>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+    )
+  })}
+</SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
 
@@ -183,44 +172,47 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           </SidebarContent>
 
           <SidebarFooter className="border-t border-slate-200/60 bg-gradient-to-r from-slate-50/50 to-blue-50/30 p-4">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="h-12 w-full justify-start gap-3 rounded-xl hover:bg-white/60 hover:shadow-sm"
-                >
-                  <Avatar className="h-8 w-8 ring-2 ring-blue-100">
-                    <AvatarImage src="/placeholder.svg?height=32&width=32" alt="User" />
-                    <AvatarFallback className="bg-gradient-to-br from-blue-500 to-indigo-500 text-white text-sm font-medium">
-                      JD
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex flex-col items-start text-left">
-                    <span className="text-sm font-medium text-slate-900">John Doe</span>
-                    <span className="text-xs text-slate-500">john@example.com</span>
-                  </div>
-                  <ChevronDown className="ml-auto h-4 w-4 text-slate-400" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 rounded-xl shadow-xl border-slate-200/60">
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="rounded-lg">
-                  <Settings className="mr-2 h-4 w-4" />
-                  Settings
-                </DropdownMenuItem>
-                <DropdownMenuItem className="rounded-lg">
-                  <Shield className="mr-2 h-4 w-4" />
-                  Privacy
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="rounded-lg text-red-600 focus:text-red-600">
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Sign out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </SidebarFooter>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            className="h-12 w-full justify-start gap-3 rounded-xl hover:bg-white/60 hover:shadow-sm"
+          >
+            <Avatar className="h-8 w-8 ring-2 ring-blue-100">
+              <AvatarImage src={session?.user?.image || "/placeholder.svg"} alt="User" />
+              <AvatarFallback className="bg-gradient-to-br from-blue-500 to-indigo-500 text-white text-sm font-medium">
+                {session?.user?.name?.[0] || "?"}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col items-start text-left">
+              <span className="text-sm font-medium text-slate-900">{session?.user?.name || "Unknown User"}</span>
+              <span className="text-xs text-slate-500">{session?.user?.email || "No email"}</span>
+            </div>
+            <ChevronDown className="ml-auto h-4 w-4 text-slate-400" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-56 rounded-xl shadow-xl border-slate-200/60">
+          <DropdownMenuLabel>My Account</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem className="rounded-lg">
+            <Settings className="mr-2 h-4 w-4" />
+            Settings
+          </DropdownMenuItem>
+          <DropdownMenuItem className="rounded-lg">
+            <Shield className="mr-2 h-4 w-4" />
+            Privacy
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            className="rounded-lg text-red-600 focus:text-red-600"
+            onClick={() => signOut()}
+          >
+            <LogOut className="mr-2 h-4 w-4" />
+            Sign out
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </SidebarFooter>
           <SidebarRail />
         </Sidebar>
 

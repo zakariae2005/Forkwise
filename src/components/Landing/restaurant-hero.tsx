@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { Menu, X } from "lucide-react"
 import Image from "next/image"
+import Link from "next/link"
 import { useState } from "react"
 
 interface RestaurantHeroProps {
@@ -17,7 +18,7 @@ export default function RestaurantHero({
   restaurantName = "Bella Vista",
   tagline = "Where Every Meal Tells a Story",
   primaryColor = "#D4A574", // Warm gold
-  logoUrl = "/placeholder.svg?height=60&width=120",
+  logoUrl = "/images/logores_no_bg.png",
   customFont = "font-serif",
 }: RestaurantHeroProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -87,13 +88,19 @@ export default function RestaurantHero({
               variant="outline"
               className="border-white/30 text-white hover:bg-white/10 backdrop-blur-sm transition-all duration-300 hover:scale-105 bg-transparent"
             >
-              Reserve Table
+              <Link href='/login'>
+              Sign Up
+
+              </Link>
             </Button>
             <Button
               className="text-white font-semibold shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl"
               style={{ backgroundColor: primaryColor }}
             >
-              Order Now
+              <Link href='/login'>
+                Sign In
+
+              </Link>
             </Button>
           </div>
 

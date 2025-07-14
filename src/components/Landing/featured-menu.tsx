@@ -5,59 +5,14 @@ import { motion } from "framer-motion"
 import { useInView } from "react-intersection-observer"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-
-const menuItems = [
-  {
-    id: 1,
-    name: "Truffle Risotto",
-    description: "Creamy Arborio rice with black truffle, parmesan, and fresh herbs",
-    price: "$28",
-    image: "/images/m1.jpg",
-    category: "Main Course",
-  },
-  {
-    id: 2,
-    name: "Grilled Branzino",
-    description: "Mediterranean sea bass with lemon, capers, and roasted vegetables",
-    price: "$32",
-    image: "/images/m3.jpg",
-    category: "Seafood",
-  },
-  {
-    id: 3,
-    name: "Osso Buco",
-    description: "Slow-braised veal shank with saffron risotto and gremolata",
-    price: "$36",
-    image: "/images/m5.jpg",
-    category: "Main Course",
-  },
-  {
-    id: 4,
-    name: "Tiramisu",
-    description: "Classic Italian dessert with espresso-soaked ladyfingers",
-    price: "$12",
-    image: "/images/m2.jpg",
-    category: "Dessert",
-  },
-  {
-    id: 5,
-    name: "Burrata Caprese",
-    description: "Fresh burrata with heirloom tomatoes, basil, and aged balsamic",
-    price: "$18",
-    image: "/images/m4.jpg",
-    category: "Appetizer",
-  },
-  {
-    id: 6,
-    name: "Lobster Ravioli",
-    description: "House-made pasta filled with lobster in a light cream sauce",
-    price: "$34",
-    image: "/images/m6.jpg",
-    category: "Pasta",
-  },
-]
+import { useMenu } from "@/store/useMenu"
+import { useEffect } from "react"
 
 export default function FeaturedMenu() {
+  const { fetchMenus, menus } = useMenu()
+  useEffect(() => {
+    fetchMenus()
+  }, [fetchMenus])
   const [ref, inView] = useInView({
     triggerOnce: true,
     threshold: 0.1,
@@ -82,7 +37,7 @@ export default function FeaturedMenu() {
         </motion.div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {menuItems.map((item, index) => (
+          {menus.map((item, index) => (
             <motion.div
               key={item.id}
               initial={{ opacity: 0, y: 30 }}
@@ -92,7 +47,7 @@ export default function FeaturedMenu() {
               <Card className="group overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 bg-white rounded-2xl">
                 <div className="relative overflow-hidden">
                   <Image
-                    src={item.image || "/placeholder.svg"}
+                    src={item.imageUrl || "/placeholder.svg"}
                     alt={item.name}
                     width={400}
                     height={300}
