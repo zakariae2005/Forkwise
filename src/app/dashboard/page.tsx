@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -19,6 +20,7 @@ import {
   CalendarDays,
   ArrowUpRight,
   ArrowDownRight,
+  Clock,
 } from "lucide-react"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { XAxis, YAxis, ResponsiveContainer, Bar, BarChart } from "recharts"
@@ -41,7 +43,7 @@ const chartConfig = {
 }
 
 // Helper function to check if a date is today
-const isToday = (date) => {
+const isToday = (date: string | number | Date) => {
   const today = new Date()
   const checkDate = new Date(date)
   return checkDate.toDateString() === today.toDateString()
@@ -55,7 +57,7 @@ const getYesterday = () => {
 }
 
 // Helper function to get day name from date
-const getDayName = (date) => {
+const getDayName = (date: string | number | Date) => {
   const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
   return days[new Date(date).getDay()]
 }
@@ -168,7 +170,7 @@ export default function RestaurantDashboard() {
   }, [expenses, incomes])
 
   // Calculate percentage changes
-  const getPercentageChange = (today, yesterday) => {
+  const getPercentageChange = (today: number, yesterday: number) => {
     if (yesterday === 0) return today > 0 ? 100 : 0
     return ((today - yesterday) / yesterday) * 100
   }
@@ -240,7 +242,7 @@ export default function RestaurantDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <Card className="backdrop-blur-sm bg-white/40 border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Today's Income</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">Today&apos;s Income</CardTitle>
             <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
               <DollarSign className="h-4 w-4 text-green-600" />
             </div>
@@ -262,7 +264,7 @@ export default function RestaurantDashboard() {
 
         <Card className="backdrop-blur-sm bg-white/40 border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Today's Expenses</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">Today&apos;s Expenses</CardTitle>
             <div className="h-8 w-8 rounded-full bg-red-100 flex items-center justify-center">
               <TrendingDown className="h-4 w-4 text-red-600" />
             </div>
@@ -328,7 +330,7 @@ export default function RestaurantDashboard() {
             <CardHeader>
               <CardTitle className="text-xl font-semibold text-gray-800">Income vs Expenses (Last 7 Days)</CardTitle>
               <CardDescription className="text-gray-600">
-                Daily comparison of your restaurant's financial performance
+                Daily comparison of your restaurant&apos;s financial performance
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -562,7 +564,7 @@ export default function RestaurantDashboard() {
                   <p className="text-sm font-medium text-gray-800">New menu item added</p>
                   <p className="text-xs text-gray-600">&quot;Truffle Pasta&quot; - $24.99</p>
                   <div className="flex items-center mt-1">
-                    
+                    <Clock className="h-3 w-3 text-gray-400 mr-1" />
                     <span className="text-xs text-gray-500">2 hours ago</span>
                   </div>
                 </div>
@@ -576,7 +578,7 @@ export default function RestaurantDashboard() {
                   <p className="text-sm font-medium text-gray-800">Income recorded</p>
                   <p className="text-xs text-gray-600">Table 12 - $156.50</p>
                   <div className="flex items-center mt-1">
-                    
+                    <Clock className="h-3 w-3 text-gray-400 mr-1" />
                     <span className="text-xs text-gray-500">4 hours ago</span>
                   </div>
                 </div>
@@ -590,7 +592,7 @@ export default function RestaurantDashboard() {
                   <p className="text-sm font-medium text-gray-800">Expense logged</p>
                   <p className="text-xs text-gray-600">Fresh ingredients - $89.30</p>
                   <div className="flex items-center mt-1">
-                    
+                    <Clock className="h-3 w-3 text-gray-400 mr-1" />
                     <span className="text-xs text-gray-500">6 hours ago</span>
                   </div>
                 </div>
