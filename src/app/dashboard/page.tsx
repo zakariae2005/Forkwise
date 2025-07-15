@@ -30,6 +30,7 @@ import { useEffect, useMemo, useState } from "react"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { useSession } from "next-auth/react"
 
 const chartConfig = {
   income: {
@@ -74,6 +75,7 @@ const getLast7Days = () => {
 }
 
 export default function RestaurantDashboard() {
+  const { data: session } = useSession()
   const { fetchExpenses, expenses, createExpense, isLoading: expenseLoading } = useExpense()
   const { fetchIncomes, incomes, createIncome, isLoading: incomeLoading } = useIncome()
 
@@ -230,7 +232,7 @@ export default function RestaurantDashboard() {
       {/* Header Section */}
       <div className="mb-8">
         <div className="backdrop-blur-sm bg-white/30 rounded-2xl p-6 border border-white/20 shadow-xl">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2">Good Morning, Maria! 👋</h1>
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2">Good Morning, {session?.user.name}! 👋</h1>
           <p className="text-lg text-gray-600 flex items-center gap-2">
             <UtensilsCrossed className="h-5 w-5" />
             Bella Vista Restaurant
@@ -542,10 +544,7 @@ export default function RestaurantDashboard() {
                 </DialogContent>
               </Dialog>
 
-              <Button className="w-full bg-orange-500 hover:bg-orange-600 text-white shadow-lg">
-                <ChefHat className="h-4 w-4 mr-2" />
-                Add Menu Item
-              </Button>
+              
             </CardContent>
           </Card>
 
